@@ -13,26 +13,24 @@ class Figure {
         this.position = getIndex(position, positions);
     }
 
-    public int[][] getState() {
+    int[][] getState() {
         return positions.get(position);
     }
 
-    public int[][] getNextRotate() {
+    int[][] getNextRotate() {
         return positions.get(getIndex(position + 1, positions));
     }
 
-    public int[][] getNextRotateReverse() {
+    int[][] getNextRotateReverse() {
         return positions.get(getPrevPosition());
     }
 
-    public int[][] rotate() {
+    void rotate() {
         position = getIndex(position + 1, positions);
-        return getState();
     }
 
-    public int[][] rotateReverse() {
+    void rotateReverse() {
         position = getPrevPosition();
-        return getState();
     }
 
     private int getPrevPosition() {
