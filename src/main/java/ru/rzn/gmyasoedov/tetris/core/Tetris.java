@@ -1,8 +1,8 @@
 package ru.rzn.gmyasoedov.tetris.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -49,9 +49,11 @@ public class Tetris {
         this.yLeftTop = y;
         figureGenerator = new SimpleFigureGenerator();
         nextFigure = figureGenerator.getNext();
+        start();
     }
 
-    public void start() {
+    private void start() {
+        lock.lock();
         score = START_SCORE;
         state = State.GAME;
         generateFigure();
@@ -59,7 +61,8 @@ public class Tetris {
 
         gameThread = new Thread(this::game);
         gameThread.start();
-        observable = new ArrayList<>();
+        observable = new CopyOnWriteArrayList<>();
+        lock.unlock();
     }
 
     private void initField() {
@@ -81,19 +84,8 @@ public class Tetris {
             while (state == State.GAME) {
                 try {
                     Thread.sleep(speed);
-
                     lock.lock();
-                    if (!contact()) {
-                        yLeftTop++;
-                        notifyObserves();
-                    } else {
-                        checkGameOver();
-                        figureToField(field);
-                        doScore();
-                        generateFigure();
-                        notifyObserves();
-                        observable = null;
-                    }
+                    downInner();
                 } catch (InterruptedException e) {
                     return;
                 } finally {
@@ -101,6 +93,18 @@ public class Tetris {
                 }
             }
         }
+    }
+
+    private void downInner() {
+        if (contact()) {
+            figureToField(field);
+            doScore();
+            checkGameOver();
+            generateFigure();
+        } else {
+            yLeftTop++;
+        }
+        notifyObserves();
     }
 
     public boolean isPause() {
@@ -127,6 +131,8 @@ public class Tetris {
     private void stopGame() {
         gameThread.interrupt();
         gameThread = null;
+        notifyObserves();
+        observable = null;
         state = State.OVER;
     }
 

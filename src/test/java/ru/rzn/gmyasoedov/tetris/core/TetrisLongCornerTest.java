@@ -145,4 +145,25 @@ class TetrisLongCornerTest {
         tetris.rotateInner(Figure::getNextRotate, Figure::rotate);
         printMatrix(tetris.getFieldState());
     }
+
+    @Test
+    void toRight1Field2() throws IOException {
+        System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
+        int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/field2.txt"));
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 4, 2);
+        printMatrix(tetris.getFieldState());
+        tetris.toRightInner();
+        printMatrix(tetris.getFieldState());
+        tetris.toRightInner();
+        printMatrix(tetris.getFieldState());
+        tetris.rotateInner(Figure::getNextRotate, Figure::rotate);
+        printMatrix(tetris.getFieldState());
+        tetris.rotateInner(Figure::getNextRotate, Figure::rotate);
+        printMatrix(tetris.getFieldState());
+
+        tetris.toLeftInner();
+        printMatrix(tetris.getFieldState());
+        tetris.rotateInner(Figure::getNextRotate, Figure::rotate);
+        printMatrix(tetris.getFieldState());
+    }
 }
