@@ -27,4 +27,16 @@ abstract class TestUtils {
         }
         return ints;
     }
+
+    public static void clearConsole() throws IOException {
+
+        final String os = System.getProperty("os.name");
+
+        if (os.toLowerCase().contains("windows")) {
+            Runtime.getRuntime().exec("cls");
+        } else {
+            Runtime.getRuntime().exec("clear");
+        }
+
+    }
 }

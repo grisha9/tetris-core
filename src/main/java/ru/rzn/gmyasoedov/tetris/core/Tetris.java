@@ -24,7 +24,7 @@ public class Tetris {
     private final SimpleFigureGenerator figureGenerator;
     private Figure figure;
     private Figure nextFigure;
-    private int[][] field;
+    private final int[][] field;
     private int xLeftTop;
     private int yLeftTop;
     private int score;
@@ -39,6 +39,7 @@ public class Tetris {
         field = new int[FIELD_HEIGHT][FIELD_WIDTH];
         figureGenerator = new SimpleFigureGenerator();
         nextFigure = figureGenerator.getNext();
+        start();
     }
 
     Tetris(int[][] field, Figure figure, int x, int y) {
@@ -49,7 +50,6 @@ public class Tetris {
         this.yLeftTop = y;
         figureGenerator = new SimpleFigureGenerator();
         nextFigure = figureGenerator.getNext();
-        start();
     }
 
     private void start() {
@@ -95,7 +95,7 @@ public class Tetris {
         }
     }
 
-    private void downInner() {
+    void downInner() {
         if (contact()) {
             figureToField(field);
             doScore();
