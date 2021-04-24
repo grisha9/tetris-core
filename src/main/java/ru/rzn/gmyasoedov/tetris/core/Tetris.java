@@ -8,6 +8,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static java.lang.String.format;
+
 
 public class Tetris {
     private static final int FIELD_HEIGHT = 20;
@@ -16,7 +18,7 @@ public class Tetris {
 
 
     private static final int BOOST = 8;
-    private static final int START_Y_LEFT_TOP = -3;
+    private static final int START_Y_LEFT_TOP = -2;
     private static final int START_X_LEFT_TOP = 3;
     private static final int STEP = 1;
     private static final int START_SCORE = 0;
@@ -39,7 +41,7 @@ public class Tetris {
         field = new int[FIELD_HEIGHT][FIELD_WIDTH];
         figureGenerator = new SimpleFigureGenerator();
         nextFigure = figureGenerator.getNext();
-        start();
+        observable = new CopyOnWriteArrayList<>();
     }
 
     Tetris(int[][] field, Figure figure, int x, int y) {
@@ -50,18 +52,20 @@ public class Tetris {
         this.yLeftTop = y;
         figureGenerator = new SimpleFigureGenerator();
         nextFigure = figureGenerator.getNext();
+        observable = new CopyOnWriteArrayList<>();
     }
 
-    private void start() {
+    public void start() {
         lock.lock();
+        if (state != State.NEW) {
+            throw new IllegalStateException(format("state should be %s but state %s", State.NEW, state));
+        }
         score = START_SCORE;
         state = State.GAME;
         generateFigure();
         initField();
-
         gameThread = new Thread(this::game);
         gameThread.start();
-        observable = new CopyOnWriteArrayList<>();
         lock.unlock();
     }
 
@@ -81,16 +85,16 @@ public class Tetris {
 
     private void game() {
         while (!Thread.interrupted()) {
-            while (state == State.GAME) {
-                try {
-                    Thread.sleep(speed);
-                    lock.lock();
+            try {
+                Thread.sleep(speed);
+                lock.lock();
+                if (state == State.GAME) {
                     downInner();
-                } catch (InterruptedException e) {
-                    return;
-                } finally {
-                    lock.unlock();
                 }
+            } catch (InterruptedException e) {
+                return;
+            } finally {
+                lock.unlock();
             }
         }
     }
@@ -111,13 +115,33 @@ public class Tetris {
         return state == State.PAUSE;
     }
 
-    public void setPause(boolean pause) {
+    public void pause() {
         lock.lock();
-        if (state == State.GAME) {
-            state = State.PAUSE;
+        try {
+            if (state == State.GAME) {
+                state = State.PAUSE;
+                notifyObserves();
+            } else {
+                throw new IllegalStateException(format("state should be %s but state %s", State.GAME, state));
+            }
+        } finally {
+            lock.unlock();
         }
-        notifyObserves();
-        lock.unlock();
+
+    }
+
+    public void resume() {
+        lock.lock();
+        try {
+            if (state == State.PAUSE) {
+                state = State.GAME;
+                notifyObserves();
+            } else {
+                throw new IllegalStateException(format("state should be %s but state %s", State.GAME, state));
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void fastSpeed() {
@@ -128,7 +152,7 @@ public class Tetris {
         speed = SLEEP_TIME;
     }
 
-    private void stopGame() {
+    public void stop() {
         gameThread.interrupt();
         gameThread = null;
         notifyObserves();
@@ -280,7 +304,7 @@ public class Tetris {
 
     private void checkGameOver() {
         if (yLeftTop < 0) {
-            stopGame();
+            stop();
         }
     }
 
