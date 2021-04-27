@@ -105,6 +105,7 @@ public class Tetris {
             doScore();
             checkGameOver();
             generateFigure();
+            normalSpeed();
         } else {
             yLeftTop++;
         }
@@ -145,19 +146,34 @@ public class Tetris {
     }
 
     public void fastSpeed() {
-        speed = SLEEP_TIME / BOOST;
+        lock.lock();
+        try {
+            speed = SLEEP_TIME / BOOST;
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public void normSpeed() {
-        speed = SLEEP_TIME;
+    public void normalSpeed() {
+        lock.lock();
+        try {
+            speed = SLEEP_TIME;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void stop() {
-        gameThread.interrupt();
-        gameThread = null;
-        notifyObserves();
-        observable = null;
-        state = State.OVER;
+        lock.lock();
+        try {
+            gameThread.interrupt();
+            gameThread = null;
+            notifyObserves();
+            observable = null;
+            state = State.OVER;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void addObserver(Consumer<TetrisState> observer) {
@@ -328,6 +344,7 @@ public class Tetris {
     }
 
     private void doScore() {
+        int lineCount = 0;
         for (int i = 0; i < FIELD_HEIGHT; i++) {
             boolean isFullLine = true;
             for (int j = 0; j < FIELD_WIDTH; j++) {
@@ -337,7 +354,7 @@ public class Tetris {
                 }
             }
             if (isFullLine) {
-                score++;
+                lineCount++;
                 for (int c = i - 1; c >= 0; c--) {
                     for (int j = 0; j < FIELD_WIDTH; j++) {
                         field[c + 1][j] = field[c][j];
@@ -345,6 +362,20 @@ public class Tetris {
                     }
                 }
             }
+        }
+        switch (lineCount) {
+            case 1:
+                score = score + 1;
+                break;
+            case 2:
+                score = score + 3;
+                break;
+            case 3:
+                score = score + 7;
+                break;
+            case 4:
+                score = score + 15;
+                break;
         }
     }
 
