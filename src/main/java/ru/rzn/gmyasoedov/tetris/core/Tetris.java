@@ -185,11 +185,11 @@ public class Tetris {
     }
 
     public void toLeft() {
-        lock.lock();
-        if (state != State.GAME) {
-            return;
-        }
         try {
+            lock.lock();
+            if (state != State.GAME) {
+                return;
+            }
             toLeftInner();
         } finally {
             lock.unlock();
@@ -198,10 +198,10 @@ public class Tetris {
 
     public void toRight() {
         lock.lock();
-        if (state != State.GAME) {
-            return;
-        }
         try {
+            if (state != State.GAME) {
+                return;
+            }
             toRightInner();
         } finally {
             lock.unlock();
