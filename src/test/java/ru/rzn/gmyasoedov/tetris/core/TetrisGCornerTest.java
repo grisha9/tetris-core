@@ -98,4 +98,15 @@ class TetrisGCornerTest {
         tetris.rotateInner(Figure::getNextRotate, Figure::rotate);
         printMatrix(tetris.getFieldState());
     }
+
+    @Test
+    void toRight4() throws IOException {
+        System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
+        int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 6, -1);
+        tetris.toRightInner();
+        tetris.toRightInner();
+        printMatrix(tetris.getFieldState());
+
+    }
 }

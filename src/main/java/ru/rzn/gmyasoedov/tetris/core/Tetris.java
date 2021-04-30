@@ -181,7 +181,7 @@ public class Tetris {
     }
 
     public boolean isRun() {
-        return gameThread != null && gameThread.isInterrupted();
+        return gameThread != null && !gameThread.isInterrupted();
     }
 
     public void toLeft() {
@@ -236,13 +236,14 @@ public class Tetris {
         boolean doLeft = true;
         int[][] figureState = figure.getState();
         for (int i = 0; i < figureState.length; i++) {
-            if ((yLeftTop + i) < 0) {
-                continue;
-            }
             int[] figureRow = figureState[i];
             for (int j = 0; j < figureRow.length; j++) {
                 if (figureState[i][j] > CELL_EMPTY) {
-                    if (((xLeftTop + j - STEP) < 0) || field[yLeftTop + i][xLeftTop + j - STEP] > CELL_EMPTY) {
+                    if ((yLeftTop + i) < 0 && (xLeftTop + j - STEP) < 0) {
+                        doLeft = false;
+                        break;
+                    } else if ((yLeftTop + i) >= 0
+                            && (((xLeftTop + j - STEP) < 0) || field[yLeftTop + i][xLeftTop + j - STEP] > CELL_EMPTY)) {
                         doLeft = false;
                         break;
                     }
@@ -263,14 +264,14 @@ public class Tetris {
         boolean doRight = true;
         int[][] figureState = figure.getState();
         for (int i = 0; i < figureState.length; i++) {
-            if ((yLeftTop + i) < 0) {
-                continue;
-            }
             int[] figureRow = figureState[i];
             for (int j = figureRow.length - 1; j >= 0; j--) {
                 if (figureState[i][j] > CELL_EMPTY) {
-                    if ((xLeftTop + j + STEP) >= FIELD_WIDTH
-                            || field[yLeftTop + i][xLeftTop + j + STEP] > CELL_EMPTY) {
+                    if ((yLeftTop + i) < 0 && (xLeftTop + j + STEP) >= FIELD_WIDTH) {
+                        doRight = false;
+                        break;
+                    } else if ((yLeftTop + i) >= 0 && ((xLeftTop + j + STEP) >= FIELD_WIDTH
+                            || field[yLeftTop + i][xLeftTop + j + STEP] > CELL_EMPTY)) {
                         doRight = false;
                         break;
                     }
@@ -319,7 +320,7 @@ public class Tetris {
     }
 
     private void checkGameOver() {
-        if (yLeftTop < 0) {
+        if (yLeftTop <= 0) {
             stop();
         }
     }

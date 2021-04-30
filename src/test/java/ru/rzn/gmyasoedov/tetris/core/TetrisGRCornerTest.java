@@ -46,6 +46,17 @@ class TetrisGRCornerTest {
     }
 
     @Test
+    void toLeft2() throws IOException {
+        System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
+        int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 0, -1);
+        printMatrix(tetris.getFieldState());
+        tetris.toLeftInner();
+        printMatrix(tetris.getFieldState());
+
+    }
+
+    @Test
     void toRight() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
