@@ -23,7 +23,7 @@ public class Tetris {
     private static final int STEP = 1;
     private static final int SLEEP_TIME = 500;
     private static final int SPEED_DELTA = 25;
-    private final SimpleFigureGenerator figureGenerator;
+    private final FigureGenerator figureGenerator;
     private Figure figure;
     private Figure nextFigure;
     private final int[][] field;
@@ -37,12 +37,23 @@ public class Tetris {
     private Lock lock = new ReentrantLock();
     private Thread gameThread;
     private List<Consumer<TetrisState>> observable;
+    private final String figureGeneratorId;
 
     public Tetris() {
         speed = SLEEP_TIME;
         field = new int[FIELD_HEIGHT][FIELD_WIDTH];
         figureGenerator = new SimpleFigureGenerator();
-        nextFigure = figureGenerator.getNext();
+        figureGeneratorId = figureGenerator.register();
+        nextFigure = figureGenerator.getNext(figureGeneratorId);
+        observable = new CopyOnWriteArrayList<>();
+    }
+
+    public Tetris(FigureGenerator figureGenerator) {
+        speed = SLEEP_TIME;
+        field = new int[FIELD_HEIGHT][FIELD_WIDTH];
+        this.figureGenerator = figureGenerator;
+        figureGeneratorId = this.figureGenerator.register();
+        nextFigure = figureGenerator.getNext(figureGeneratorId);
         observable = new CopyOnWriteArrayList<>();
     }
 
@@ -53,7 +64,8 @@ public class Tetris {
         this.xLeftTop = x;
         this.yLeftTop = y;
         figureGenerator = new SimpleFigureGenerator();
-        nextFigure = figureGenerator.getNext();
+        figureGeneratorId = figureGenerator.register();
+        nextFigure = figureGenerator.getNext(figureGeneratorId);
         observable = new CopyOnWriteArrayList<>();
     }
 
@@ -81,7 +93,7 @@ public class Tetris {
         yLeftTop = START_Y_LEFT_TOP;
 
         figure = nextFigure;
-        nextFigure = figureGenerator.getNext();
+        nextFigure = figureGenerator.getNext(figureGeneratorId);
     }
 
     private void game() {
