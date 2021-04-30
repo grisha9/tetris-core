@@ -17,12 +17,12 @@ public class Tetris {
     private static final int CELL_EMPTY = 0;
 
 
-    private static final int BOOST = 8;
+    private static final int BOOST_SPEED = 80;
     private static final int START_Y_LEFT_TOP = -2;
     private static final int START_X_LEFT_TOP = 3;
     private static final int STEP = 1;
-    private static final int START_SCORE = 0;
     private static final int SLEEP_TIME = 500;
+    private static final int SPEED_DELTA = 25;
     private final SimpleFigureGenerator figureGenerator;
     private Figure figure;
     private Figure nextFigure;
@@ -31,7 +31,9 @@ public class Tetris {
     private int yLeftTop;
     private int score;
     private int speed;
-    private volatile State state = State.NEW;
+    private int speedTmp;
+    private int difficultyLevel = 1;
+    private State state = State.NEW;
     private Lock lock = new ReentrantLock();
     private Thread gameThread;
     private List<Consumer<TetrisState>> observable;
@@ -60,7 +62,6 @@ public class Tetris {
         if (state != State.NEW) {
             throw new IllegalStateException(format("state should be %s but state %s", State.NEW, state));
         }
-        score = START_SCORE;
         state = State.GAME;
         generateFigure();
         initField();
@@ -106,10 +107,20 @@ public class Tetris {
             checkGameOver();
             generateFigure();
             normalSpeed();
+            checkDifficulty();
         } else {
             yLeftTop++;
         }
         notifyObserves();
+    }
+
+    private void checkDifficulty() {
+        if (difficultyLevel <= 10) {
+            if (score > difficultyLevel * 50) {
+                speed -= SPEED_DELTA;
+                difficultyLevel++;
+            }
+        }
     }
 
     public boolean isPause() {
@@ -148,7 +159,8 @@ public class Tetris {
     public void fastSpeed() {
         lock.lock();
         try {
-            speed = SLEEP_TIME / BOOST;
+            speedTmp = speed;
+            speed = BOOST_SPEED;
         } finally {
             lock.unlock();
         }
@@ -157,7 +169,10 @@ public class Tetris {
     public void normalSpeed() {
         lock.lock();
         try {
-            speed = SLEEP_TIME;
+            if (speedTmp > 0) {
+                speed = speedTmp;
+                speedTmp = 0;
+            }
         } finally {
             lock.unlock();
         }
@@ -166,7 +181,9 @@ public class Tetris {
     public void stop() {
         lock.lock();
         try {
-            gameThread.interrupt();
+            if (gameThread != null) {
+                gameThread.interrupt();
+            }
             gameThread = null;
             notifyObserves();
             observable = null;
