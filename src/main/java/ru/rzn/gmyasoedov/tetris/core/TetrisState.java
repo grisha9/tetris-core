@@ -4,12 +4,14 @@ public class TetrisState {
     private final int[][] field;
     private final int[][] nextFigure;
     private final int score;
-    private final String state;
+    private final int level;
+    private final Tetris.State state;
 
-    public TetrisState(int[][] field, int[][] nextFigure, int score, String state) {
+    public TetrisState(int[][] field, int[][] nextFigure, int score, int level, Tetris.State state) {
         this.field = field;
         this.nextFigure = nextFigure;
         this.score = score;
+        this.level = level;
         this.state = state;
     }
 
@@ -25,7 +27,11 @@ public class TetrisState {
         return score;
     }
 
-    public String getState() {
+    public int getLevel() {
+        return level;
+    }
+
+    public Tetris.State getState() {
         return state;
     }
 }

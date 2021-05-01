@@ -32,7 +32,7 @@ public class Tetris {
     private int score;
     private int speed;
     private int speedTmp;
-    private int difficultyLevel = 1;
+    private int level = 1;
     private State state = State.NEW;
     private Lock lock = new ReentrantLock();
     private Thread gameThread;
@@ -127,45 +127,28 @@ public class Tetris {
     }
 
     private void checkDifficulty() {
-        if (difficultyLevel <= 10) {
-            if (score > difficultyLevel * 50) {
+        if (level <= 10) {
+            if (score > level * 50) {
                 speed -= SPEED_DELTA;
-                difficultyLevel++;
+                level++;
             }
         }
     }
 
-    public boolean isPause() {
-        return state == State.PAUSE;
-    }
-
-    public void pause() {
+    public void pauseOrResume() {
         lock.lock();
         try {
             if (state == State.GAME) {
                 state = State.PAUSE;
                 notifyObserves();
-            } else {
-                throw new IllegalStateException(format("state should be %s but state %s", State.GAME, state));
-            }
-        } finally {
-            lock.unlock();
-        }
-
-    }
-
-    public void resume() {
-        lock.lock();
-        try {
-            if (state == State.PAUSE) {
+            } else if (state == State.PAUSE) {
                 state = State.GAME;
                 notifyObserves();
-            } else {
-                throw new IllegalStateException(format("state should be %s but state %s", State.GAME, state));
             }
         } finally {
             lock.unlock();
         }
+
     }
 
     public void fastSpeed() {
@@ -197,9 +180,9 @@ public class Tetris {
                 gameThread.interrupt();
             }
             gameThread = null;
+            state = State.OVER;
             notifyObserves();
             observable = null;
-            state = State.OVER;
         } finally {
             lock.unlock();
         }
@@ -207,10 +190,6 @@ public class Tetris {
 
     public void addObserver(Consumer<TetrisState> observer) {
         observable.add(observer);
-    }
-
-    public boolean isRun() {
-        return gameThread != null && !gameThread.isInterrupted();
     }
 
     public void toLeft() {
@@ -430,19 +409,19 @@ public class Tetris {
         return cloneFiled;
     }
 
-    private TetrisState getState() {
-        return new TetrisState(getFieldState(), nextFigure.getState(), score, state.name());
-    }
-
     private void notifyObserves() {
         if (observable == null || observable.isEmpty()) {
             return;
         }
-        TetrisState state = getState();
+        TetrisState state = getTetrisState();
         observable.forEach(o -> o.accept(state));
     }
 
-    private enum State {
+    private TetrisState getTetrisState() {
+        return new TetrisState(getFieldState(), nextFigure.getState(), score, level, state);
+    }
+
+    public enum State {
         NEW, GAME, PAUSE, OVER
     }
 }
