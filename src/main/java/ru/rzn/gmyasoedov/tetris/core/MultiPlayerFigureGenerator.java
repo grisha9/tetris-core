@@ -17,7 +17,7 @@ public class MultiPlayerFigureGenerator implements FigureGenerator {
     private final Map<String, BlockingQueue<Figure>> queueBySessionId = new ConcurrentHashMap<>();
     private final ArrayList<Figure> initFigures;
     private final Lock lock = new ReentrantLock();
-    private boolean block;
+    private volatile boolean block;
 
     public MultiPlayerFigureGenerator() {
         this.initFigures = getFigures();
@@ -44,9 +44,6 @@ public class MultiPlayerFigureGenerator implements FigureGenerator {
 
     @Override
     public Figure getNext(String sessionId) {
-        if (!block) {
-            block = true;
-        }
         BlockingQueue<Figure> figures = getSessionFigures(sessionId);
         if (figures == null) {
             throw new IllegalStateException("no session " + sessionId);
@@ -66,6 +63,10 @@ public class MultiPlayerFigureGenerator implements FigureGenerator {
             }
         }
         return figure;
+    }
+
+    public void block() {
+        this.block = true;
     }
 
     BlockingQueue<Figure> getSessionFigures(String sessionId) {
