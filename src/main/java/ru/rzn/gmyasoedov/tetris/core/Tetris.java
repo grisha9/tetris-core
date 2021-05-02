@@ -22,7 +22,7 @@ public class Tetris {
     private static final int START_X_LEFT_TOP = 3;
     private static final int STEP = 1;
     private static final int SLEEP_TIME = 500;
-    private static final int SPEED_DELTA = 25;
+    private static final int SPEED_DELTA = 35;
     private final FigureGenerator figureGenerator;
     private Figure figure;
     private Figure nextFigure;
@@ -127,7 +127,7 @@ public class Tetris {
     }
 
     private void checkDifficulty() {
-        if (level <= 10) {
+        if (level < 10) {
             if (score > level * 50) {
                 speed -= SPEED_DELTA;
                 level++;
@@ -154,8 +154,10 @@ public class Tetris {
     public void fastSpeed() {
         lock.lock();
         try {
-            speedTmp = speed;
-            speed = BOOST_SPEED;
+            if (speed != BOOST_SPEED) {
+                speedTmp = speed;
+                speed = BOOST_SPEED;
+            }
         } finally {
             lock.unlock();
         }
