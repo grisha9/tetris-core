@@ -100,14 +100,16 @@ public class Tetris {
         while (!Thread.interrupted()) {
             try {
                 Thread.sleep(speed);
-                lock.lock();
-                if (state == State.GAME) {
-                    downInner();
+                try {
+                    lock.lock();
+                    if (state == State.GAME) {
+                        downInner();
+                    }
+                } finally {
+                    lock.unlock();
                 }
             } catch (InterruptedException e) {
                 return;
-            } finally {
-                lock.unlock();
             }
         }
     }
