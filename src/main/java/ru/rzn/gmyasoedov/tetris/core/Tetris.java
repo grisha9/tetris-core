@@ -2,6 +2,7 @@ package ru.rzn.gmyasoedov.tetris.core;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -38,6 +39,7 @@ public class Tetris {
     private Thread gameThread;
     private List<Consumer<TetrisState>> observable;
     private final String figureGeneratorId;
+    private final String id;
 
     public Tetris() {
         speed = SLEEP_TIME;
@@ -46,15 +48,17 @@ public class Tetris {
         figureGeneratorId = figureGenerator.register();
         nextFigure = figureGenerator.getNext(figureGeneratorId);
         observable = new CopyOnWriteArrayList<>();
+        id = UUID.randomUUID().toString();
     }
 
-    public Tetris(FigureGenerator figureGenerator) {
+    public Tetris(FigureGenerator figureGenerator, String id) {
         speed = SLEEP_TIME;
         field = new int[FIELD_HEIGHT][FIELD_WIDTH];
         this.figureGenerator = figureGenerator;
         figureGeneratorId = this.figureGenerator.register();
         nextFigure = figureGenerator.getNext(figureGeneratorId);
         observable = new CopyOnWriteArrayList<>();
+        this.id = id;
     }
 
     Tetris(int[][] field, Figure figure, int x, int y) {
@@ -67,6 +71,7 @@ public class Tetris {
         figureGeneratorId = figureGenerator.register();
         nextFigure = figureGenerator.getNext(figureGeneratorId);
         observable = new CopyOnWriteArrayList<>();
+        id = UUID.randomUUID().toString();
     }
 
     public void start() {
@@ -242,6 +247,10 @@ public class Tetris {
         } finally {
             lock.unlock();
         }
+    }
+
+    public String getId() {
+        return id;
     }
 
     void toLeftInner() {
@@ -422,7 +431,7 @@ public class Tetris {
     }
 
     private TetrisState getTetrisState() {
-        return new TetrisState(getFieldState(), nextFigure.getState(), score, level, state);
+        return new TetrisState(id, getFieldState(), nextFigure.getState(), score, level, state);
     }
 
     public enum State {
