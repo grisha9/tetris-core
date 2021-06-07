@@ -52,6 +52,7 @@ public class MultiPlayerFigureGenerator implements FigureGenerator {
         if (figures.size() < LIMIT_TO_RESIZE) {
             lock.lock();
             try {
+                //todo remove game over queue
                 if (figures.size() < LIMIT_TO_RESIZE) {
                     ArrayList<Figure> newFigures = getFigures();
                     for (BlockingQueue<Figure> value : queueBySessionId.values()) {
@@ -62,7 +63,7 @@ public class MultiPlayerFigureGenerator implements FigureGenerator {
                 lock.unlock();
             }
         }
-        return figure;
+        return figure.clone();
     }
 
     public void block() {

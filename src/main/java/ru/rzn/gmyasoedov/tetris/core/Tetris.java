@@ -253,6 +253,10 @@ public class Tetris {
         return id;
     }
 
+    public State getState() {
+        return state;
+    }
+
     void toLeftInner() {
         boolean doLeft = true;
         int[][] figureState = figure.getState();
