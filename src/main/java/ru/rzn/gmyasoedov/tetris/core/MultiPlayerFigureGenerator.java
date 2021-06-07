@@ -66,6 +66,11 @@ public class MultiPlayerFigureGenerator implements FigureGenerator {
         return figure.clone();
     }
 
+    @Override
+    public void gameOver(String sessionId) {
+        queueBySessionId.remove(sessionId);
+    }
+
     public void block() {
         this.block = true;
     }

@@ -190,6 +190,7 @@ public class Tetris {
             }
             gameThread = null;
             state = State.OVER;
+            figureGenerator.gameOver(getId());
             notifyObserves();
             observable = null;
         } finally {

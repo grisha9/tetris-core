@@ -10,6 +10,8 @@ public interface FigureGenerator {
 
     Figure getNext(String sessionId);
 
+    default void gameOver(String sessionId) {};
+
     default Figure generateFigure() {
         Figures figures = Figures.values()[ThreadLocalRandom.current().nextInt(FIGURE_COUNT)];
         int position = ThreadLocalRandom.current().nextInt(4);
