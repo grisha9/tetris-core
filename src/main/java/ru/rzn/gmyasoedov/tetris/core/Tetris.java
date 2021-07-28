@@ -38,15 +38,13 @@ public class Tetris {
     private Lock lock = new ReentrantLock();
     private Thread gameThread;
     private List<Consumer<TetrisState>> observable;
-    private final String figureGeneratorId;
     private final String id;
 
     public Tetris() {
         speed = SLEEP_TIME;
         field = new int[FIELD_HEIGHT][FIELD_WIDTH];
-        figureGenerator = new SimpleFigureGenerator();
-        figureGeneratorId = figureGenerator.register();
-        nextFigure = figureGenerator.getNext(figureGeneratorId);
+        figureGenerator = new FigureGenerator();
+        nextFigure = figureGenerator.getNext();
         observable = new CopyOnWriteArrayList<>();
         id = UUID.randomUUID().toString();
     }
@@ -55,8 +53,7 @@ public class Tetris {
         speed = SLEEP_TIME;
         field = new int[FIELD_HEIGHT][FIELD_WIDTH];
         this.figureGenerator = figureGenerator;
-        figureGeneratorId = this.figureGenerator.register();
-        nextFigure = figureGenerator.getNext(figureGeneratorId);
+        nextFigure = figureGenerator.getNext();
         observable = new CopyOnWriteArrayList<>();
         this.id = id;
     }
@@ -67,9 +64,8 @@ public class Tetris {
         this.figure = figure;
         this.xLeftTop = x;
         this.yLeftTop = y;
-        figureGenerator = new SimpleFigureGenerator();
-        figureGeneratorId = figureGenerator.register();
-        nextFigure = figureGenerator.getNext(figureGeneratorId);
+        figureGenerator = new FigureGenerator();
+        nextFigure = figureGenerator.getNext();
         observable = new CopyOnWriteArrayList<>();
         id = UUID.randomUUID().toString();
     }
@@ -98,7 +94,7 @@ public class Tetris {
         yLeftTop = START_Y_LEFT_TOP;
 
         figure = nextFigure;
-        nextFigure = figureGenerator.getNext(figureGeneratorId);
+        nextFigure = figureGenerator.getNext();
     }
 
     private void game() {
@@ -190,7 +186,6 @@ public class Tetris {
             }
             gameThread = null;
             state = State.OVER;
-            figureGenerator.gameOver(getId());
             notifyObserves();
             observable = null;
         } finally {

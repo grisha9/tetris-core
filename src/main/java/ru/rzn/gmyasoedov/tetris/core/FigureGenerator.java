@@ -1,20 +1,23 @@
 package ru.rzn.gmyasoedov.tetris.core;
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
-public interface FigureGenerator {
-
+public class FigureGenerator {
     int FIGURE_COUNT = Figures.values().length;
 
-    String register();
+    private final Random random;
 
-    Figure getNext(String sessionId);
+    public FigureGenerator() {
+        random = new Random();
+    }
 
-    default void gameOver(String sessionId) {};
+    public FigureGenerator(long seed) {
+        random = new Random(seed);
+    }
 
-    default Figure generateFigure() {
-        Figures figures = Figures.values()[ThreadLocalRandom.current().nextInt(FIGURE_COUNT)];
-        int position = ThreadLocalRandom.current().nextInt(4);
+    public Figure getNext() {
+        Figures figures = Figures.values()[random.nextInt(FIGURE_COUNT)];
+        int position = random.nextInt(4);
         return new Figure(figures.getPositions(), position);
     }
 }
