@@ -18,12 +18,11 @@ public class Tetris {
     private static final int CELL_EMPTY = 0;
 
 
-    private static final int BOOST_SPEED = 80;
+    private static final int BOOST_SPEED = 50;
     private static final int START_Y_LEFT_TOP = -2;
     private static final int START_X_LEFT_TOP = 3;
     private static final int STEP = 1;
     private static final int SLEEP_TIME = 500;
-    private static final int SPEED_DELTA = 35;
     private final FigureGenerator figureGenerator;
     private Figure figure;
     private Figure nextFigure;
@@ -39,6 +38,7 @@ public class Tetris {
     private Thread gameThread;
     private List<Consumer<TetrisState>> observable;
     private final String id;
+    private TetrisSettings tetrisSettings;
 
     public Tetris() {
         speed = SLEEP_TIME;
@@ -47,15 +47,17 @@ public class Tetris {
         nextFigure = figureGenerator.getNext();
         observable = new CopyOnWriteArrayList<>();
         id = UUID.randomUUID().toString();
+        tetrisSettings = new TetrisSettings();
     }
 
-    public Tetris(FigureGenerator figureGenerator, String id) {
-        speed = SLEEP_TIME;
-        field = new int[FIELD_HEIGHT][FIELD_WIDTH];
+    public Tetris(FigureGenerator figureGenerator, String id, TetrisSettings tetrisSettings) {
+        this.speed = SLEEP_TIME;
+        this.field = new int[FIELD_HEIGHT][FIELD_WIDTH];
         this.figureGenerator = figureGenerator;
-        nextFigure = figureGenerator.getNext();
-        observable = new CopyOnWriteArrayList<>();
+        this.nextFigure = figureGenerator.getNext();
+        this.observable = new CopyOnWriteArrayList<>();
         this.id = id;
+        this.tetrisSettings = tetrisSettings == null ? new TetrisSettings() : tetrisSettings;
     }
 
     Tetris(int[][] field, Figure figure, int x, int y) {
@@ -131,8 +133,8 @@ public class Tetris {
 
     private void checkDifficulty() {
         if (level < 10) {
-            if (score > level * 50) {
-                speed -= SPEED_DELTA;
+            if (score > level * tetrisSettings.getScoreLevelDelta()) {
+                speed = Math.max(speed - tetrisSettings.getSpeedDelta(), BOOST_SPEED);
                 level++;
             }
         }
