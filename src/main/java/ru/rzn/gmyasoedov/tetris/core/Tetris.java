@@ -1,5 +1,7 @@
 package ru.rzn.gmyasoedov.tetris.core;
 
+import org.jetbrains.annotations.TestOnly;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -13,17 +15,17 @@ import static java.lang.String.format;
 
 
 public class Tetris {
-    private static final int FIELD_HEIGHT = 20;
+    private static final int FIELD_HEIGHT = 24;
     private static final int FIELD_WIDTH = 10;
     private static final int CELL_EMPTY = 0;
 
 
     private static final int BOOST_SPEED = 50;
-    private static final int START_Y_LEFT_TOP = -2;
     private static final int START_X_LEFT_TOP = 3;
     private static final int STEP = 1;
     private static final int SLEEP_TIME = 500;
     private final FigureGenerator figureGenerator;
+    private final Lock lock = new ReentrantLock();
     private Figure figure;
     private Figure nextFigure;
     private final int[][] field;
@@ -34,7 +36,6 @@ public class Tetris {
     private int speedTmp;
     private int level = 1;
     private State state = State.NEW;
-    private Lock lock = new ReentrantLock();
     private Thread gameThread;
     private List<Consumer<TetrisState>> observable;
     private final String id;
@@ -60,7 +61,10 @@ public class Tetris {
         this.tetrisSettings = tetrisSettings == null ? new TetrisSettings() : tetrisSettings;
     }
 
+    @TestOnly
     Tetris(int[][] field, Figure figure, int x, int y) {
+        assert x >= 0 && x < 10;
+        assert y >= 0 && y < 24;
         speed = SLEEP_TIME;
         this.field = field;
         this.figure = figure;
@@ -92,11 +96,18 @@ public class Tetris {
     }
 
     private void generateFigure() {
-        xLeftTop = START_X_LEFT_TOP;
-        yLeftTop = START_Y_LEFT_TOP;
-
         figure = nextFigure;
         nextFigure = figureGenerator.getNext();
+
+        xLeftTop = START_X_LEFT_TOP;
+        int[][] figureState = figure.getState();
+        yLeftTop = 4 - figureState.length;
+        for (int value : figureState[figureState.length - 1]) {
+            if (value != CELL_EMPTY) {
+                return;
+            }
+        }
+        yLeftTop++;
     }
 
     private void game() {
@@ -262,11 +273,7 @@ public class Tetris {
             int[] figureRow = figureState[i];
             for (int j = 0; j < figureRow.length; j++) {
                 if (figureState[i][j] > CELL_EMPTY) {
-                    if ((yLeftTop + i) < 0 && (xLeftTop + j - STEP) < 0) {
-                        doLeft = false;
-                        break;
-                    } else if ((yLeftTop + i) >= 0
-                            && (((xLeftTop + j - STEP) < 0) || field[yLeftTop + i][xLeftTop + j - STEP] > CELL_EMPTY)) {
+                    if (((xLeftTop + j - STEP) < 0) || field[yLeftTop + i][xLeftTop + j - STEP] > CELL_EMPTY) {
                         doLeft = false;
                         break;
                     }
@@ -290,11 +297,7 @@ public class Tetris {
             int[] figureRow = figureState[i];
             for (int j = figureRow.length - 1; j >= 0; j--) {
                 if (figureState[i][j] > CELL_EMPTY) {
-                    if ((yLeftTop + i) < 0 && (xLeftTop + j + STEP) >= FIELD_WIDTH) {
-                        doRight = false;
-                        break;
-                    } else if ((yLeftTop + i) >= 0 && ((xLeftTop + j + STEP) >= FIELD_WIDTH
-                            || field[yLeftTop + i][xLeftTop + j + STEP] > CELL_EMPTY)) {
+                    if ((xLeftTop + j + STEP) >= FIELD_WIDTH || field[yLeftTop + i][xLeftTop + j + STEP] > CELL_EMPTY) {
                         doRight = false;
                         break;
                     }
@@ -317,9 +320,6 @@ public class Tetris {
         boolean rotate = true;
 
         for (int i = 0; i < nextState.length; i++) {
-            if ((yLeftTop + i) < 0) {
-                continue;
-            }
             int[] figureRow = nextState[i];
             for (int j = 0; j < figureRow.length; j++) {
                 if (nextState[i][j] > CELL_EMPTY) {
@@ -343,17 +343,17 @@ public class Tetris {
     }
 
     private void checkGameOver() {
-        if (yLeftTop <= 0) {
-            stop();
+        for (int i = 0; i < FIELD_WIDTH; i++) {
+            if (field[3][i] != CELL_EMPTY) {
+                stop();
+                break;
+            }
         }
     }
 
     private boolean contact() {
         int[][] state = figure.getState();
         for (int i = 0; i < state.length; i++) {
-            if ((yLeftTop + i) < 0) {
-                continue;
-            }
             int[] figureRow = state[i];
             for (int j = 0; j < figureRow.length; j++) {
                 if (state[i][j] > CELL_EMPTY) {
@@ -408,7 +408,7 @@ public class Tetris {
         for (int i = 0; i < state.length; i++) {
             int[] figureRow = state[i];
             for (int j = 0; j < figureRow.length; j++) {
-                if (state[i][j] > CELL_EMPTY && (yLeftTop + i) >= 0) {
+                if (state[i][j] > CELL_EMPTY) {
                     filedMatrix[yLeftTop + i][xLeftTop + j] = state[i][j];
                 }
             }
@@ -416,11 +416,21 @@ public class Tetris {
     }
 
     int[][] getFieldState() {
-        int[][] cloneFiled = new int[field.length][];
-        for (int i = 0; i < field.length; i++) {
-            cloneFiled[i] = field[i].clone();
+        int[][] cloneFiled = new int[20][];
+        for (int i = 0; i < 20; i++) {
+            cloneFiled[i] = field[i + 4].clone();
         }
-        figureToField(cloneFiled);
+
+        int[][] state = figure.getState();
+        for (int i = 0; i < state.length; i++) {
+            int[] figureRow = state[i];
+            for (int j = 0; j < figureRow.length; j++) {
+                if ((yLeftTop + i) > 3 && state[i][j] > CELL_EMPTY) {
+                    cloneFiled[yLeftTop + i - 4][xLeftTop + j] = state[i][j];
+                }
+            }
+        }
+
         return cloneFiled;
     }
 

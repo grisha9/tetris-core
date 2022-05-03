@@ -17,7 +17,7 @@ class TetrisGRCornerTest {
     void toLeft() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 0), 0, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 0), 0, 6);
         printMatrix(tetris.getFieldState());
         tetris.toLeftInner();
         printMatrix(tetris.getFieldState());
@@ -35,7 +35,7 @@ class TetrisGRCornerTest {
     void toLeft1() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 3), 0, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 3), 0, 6);
         printMatrix(tetris.getFieldState());
         tetris.toLeftInner();
         printMatrix(tetris.getFieldState());
@@ -49,7 +49,7 @@ class TetrisGRCornerTest {
     void toLeft2() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 0, -1);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 0, 3);
         printMatrix(tetris.getFieldState());
         tetris.toLeftInner();
         printMatrix(tetris.getFieldState());
@@ -60,7 +60,7 @@ class TetrisGRCornerTest {
     void toRight() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 0), 6, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 0), 6, 6);
         printMatrix(tetris.getFieldState());
         tetris.toRightInner();
         printMatrix(tetris.getFieldState());
@@ -78,7 +78,7 @@ class TetrisGRCornerTest {
     void toRight1() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 6, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 6, 6);
         printMatrix(tetris.getFieldState());
         tetris.toRightInner();
         printMatrix(tetris.getFieldState());
@@ -94,7 +94,7 @@ class TetrisGRCornerTest {
     void toRight3() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 3), 6, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 3), 6, 6);
         printMatrix(tetris.getFieldState());
         tetris.toRightInner();
         printMatrix(tetris.getFieldState());

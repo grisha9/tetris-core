@@ -17,7 +17,7 @@ class TetrisZRCornerTest {
     void toLeft() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 0), 0, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 0), 0, 6);
         printMatrix(tetris.getFieldState());
         tetris.toLeftInner();
         printMatrix(tetris.getFieldState());
@@ -33,7 +33,7 @@ class TetrisZRCornerTest {
     void toLeft1() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 0, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 0, 6);
         printMatrix(tetris.getFieldState());
         tetris.toLeftInner();
         printMatrix(tetris.getFieldState());
@@ -49,7 +49,7 @@ class TetrisZRCornerTest {
     void toRight() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 0), 6, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 0), 6, 6);
         printMatrix(tetris.getFieldState());
         tetris.toRightInner();
         printMatrix(tetris.getFieldState());
@@ -65,7 +65,7 @@ class TetrisZRCornerTest {
     void toRight1() throws IOException {
         System.out.println(new Object() {}.getClass().getEnclosingMethod().getName());
         int[][] matrix = TestUtils.readMatrix(Paths.get("src/test/resources/empty.txt"));
-        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 6, 2);
+        Tetris tetris = new Tetris(matrix, new Figure(POSITIONS, 1), 6, 6);
         printMatrix(tetris.getFieldState());
         tetris.toRightInner();
         printMatrix(tetris.getFieldState());

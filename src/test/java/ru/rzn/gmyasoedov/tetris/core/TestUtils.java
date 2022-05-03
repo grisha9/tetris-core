@@ -20,6 +20,9 @@ abstract class TestUtils {
 
     public static int[][] readMatrix(Path filePath) throws IOException {
         List<String> lines = Files.readAllLines(filePath.toAbsolutePath());
+        while (lines.size() < 24) {
+            lines.add(0, "0 0 0 0 0 0 0 0 0 0");
+        }
         int[][] ints = new int[lines.size()][];
         for (int i = 0; i < lines.size(); i++) {
             ints[i] = Stream.of(lines.get(i).split(" ")).mapToInt(Integer::valueOf).toArray();

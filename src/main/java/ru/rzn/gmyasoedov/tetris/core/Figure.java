@@ -13,10 +13,6 @@ class Figure {
         this.position = getIndex(position, positions);
     }
 
-    protected Figure clone() {
-        return new Figure(positions, position);
-    }
-
     int[][] getState() {
         return positions.get(position);
     }
