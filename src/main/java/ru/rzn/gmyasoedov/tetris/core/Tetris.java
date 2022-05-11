@@ -37,7 +37,7 @@ public class Tetris {
     private int level = 1;
     private State state = State.NEW;
     private Thread gameThread;
-    private List<Consumer<TetrisState>> observable;
+    private final List<Consumer<TetrisState>> observable = new CopyOnWriteArrayList<>();
     private final String id;
     private TetrisSettings tetrisSettings;
 
@@ -46,7 +46,6 @@ public class Tetris {
         field = new int[FIELD_HEIGHT][FIELD_WIDTH];
         figureGenerator = new FigureGenerator();
         nextFigure = figureGenerator.getNext();
-        observable = new CopyOnWriteArrayList<>();
         id = UUID.randomUUID().toString();
         tetrisSettings = new TetrisSettings();
     }
@@ -56,7 +55,6 @@ public class Tetris {
         this.field = new int[FIELD_HEIGHT][FIELD_WIDTH];
         this.figureGenerator = figureGenerator;
         this.nextFigure = figureGenerator.getNext();
-        this.observable = new CopyOnWriteArrayList<>();
         this.id = id;
         this.tetrisSettings = tetrisSettings == null ? new TetrisSettings() : tetrisSettings;
     }
@@ -72,7 +70,6 @@ public class Tetris {
         this.yLeftTop = y;
         figureGenerator = new FigureGenerator();
         nextFigure = figureGenerator.getNext();
-        observable = new CopyOnWriteArrayList<>();
         id = UUID.randomUUID().toString();
     }
 
@@ -200,7 +197,7 @@ public class Tetris {
             gameThread = null;
             state = State.OVER;
             notifyObserves();
-            observable = null;
+            observable.clear();
         } finally {
             lock.unlock();
         }
@@ -208,6 +205,10 @@ public class Tetris {
 
     public void addObserver(Consumer<TetrisState> observer) {
         observable.add(observer);
+    }
+
+    public void removeObserver(Consumer<TetrisState> observer) {
+        observable.remove(observer);
     }
 
     public void toLeft() {
@@ -435,9 +436,7 @@ public class Tetris {
     }
 
     private void notifyObserves() {
-        if (observable == null || observable.isEmpty()) {
-            return;
-        }
+        if (observable.isEmpty()) return;
         TetrisState state = getTetrisState();
         observable.forEach(o -> o.accept(state));
     }
