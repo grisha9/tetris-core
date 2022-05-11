@@ -188,6 +188,21 @@ public class Tetris {
         }
     }
 
+    public void fastOrNormalSpeed() {
+        lock.lock();
+        try {
+            if (speed != BOOST_SPEED) {
+                speedTmp = speed;
+                speed = BOOST_SPEED;
+            } else if (speedTmp > 0) {
+                speed = speedTmp;
+                speedTmp = 0;
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public void stop() {
         lock.lock();
         try {
