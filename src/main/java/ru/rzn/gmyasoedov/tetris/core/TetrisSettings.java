@@ -6,6 +6,8 @@ public class TetrisSettings {
 
     private int scoreLevelDelta = SCORE_LEVEL_DELTA;
     private int speedDelta = SPEED_DELTA;
+    private boolean commonMaxSpeed = false;
+    private boolean badRowAfterTetris = false;
 
     public TetrisSettings() {}
 
@@ -14,7 +16,7 @@ public class TetrisSettings {
     }
 
     public TetrisSettings setScoreLevelDelta(int scoreLevelDelta) {
-        if (speedDelta < 10) return null;
+        if (speedDelta < 10) return this;
         this.scoreLevelDelta = scoreLevelDelta;
         return this;
     }
@@ -24,8 +26,24 @@ public class TetrisSettings {
     }
 
     public TetrisSettings setSpeedDelta(int speedDelta) {
-        if (speedDelta > 200) return null;
+        if (speedDelta > 200) return this;
         this.speedDelta = speedDelta;
         return this;
+    }
+
+    public boolean isCommonMaxSpeed() {
+        return commonMaxSpeed;
+    }
+
+    public void setCommonMaxSpeed(boolean commonMaxSpeed) {
+        this.commonMaxSpeed = commonMaxSpeed;
+    }
+
+    public boolean isBadRowAfterTetris() {
+        return badRowAfterTetris;
+    }
+
+    public void setBadRowAfterTetris(boolean badRowAfterTetris) {
+        this.badRowAfterTetris = badRowAfterTetris;
     }
 }

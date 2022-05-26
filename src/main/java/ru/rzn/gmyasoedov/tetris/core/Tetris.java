@@ -126,25 +126,26 @@ public class Tetris {
     }
 
     void downInner() {
+        int lineCount = 0;
         if (contact()) {
             figureToField(field);
-            doScore();
+            lineCount = doScore();
             checkGameOver();
             generateFigure();
             normalSpeed();
-            checkDifficulty();
+            checkDifficulty(lineCount);
         } else {
             yLeftTop++;
         }
-        notifyObserves();
+        notifyObserves(lineCount > 3);
     }
 
-    private void checkDifficulty() {
-        if (level < 10) {
-            if (score > level * tetrisSettings.getScoreLevelDelta()) {
-                speed = Math.max(speed - tetrisSettings.getSpeedDelta(), BOOST_SPEED);
-                level++;
-            }
+    private void checkDifficulty(int lineCount) {
+        if (lineCount == 0 || level >= 10) return;
+        int newLevel = score / tetrisSettings.getScoreLevelDelta() + 1;
+        if (newLevel > level) {
+            level = newLevel;
+            speed = Math.max(SLEEP_TIME - (tetrisSettings.getSpeedDelta() * (newLevel - 1)), BOOST_SPEED);
         }
     }
 
@@ -282,6 +283,25 @@ public class Tetris {
         return state;
     }
 
+    public void setLevel(int newLevel) {
+        if (newLevel < 2 || newLevel > 10) return;
+        lock.lock();
+        if (newLevel > level) {
+            level = newLevel;
+            var newSpeed = Math.max(SLEEP_TIME - (tetrisSettings.getSpeedDelta() * (newLevel - 1)), BOOST_SPEED);
+            if (speedTmp > 0) {
+                speedTmp = newSpeed;
+            } else {
+                speed = newSpeed;
+            }
+        }
+        lock.unlock();
+    }
+
+    public void addRow() {
+
+    }
+
     void toLeftInner() {
         boolean doLeft = true;
         int[][] figureState = figure.getState();
@@ -383,7 +403,7 @@ public class Tetris {
         return false;
     }
 
-    private void doScore() {
+    private int doScore() {
         int lineCount = 0;
         for (int i = 0; i < FIELD_HEIGHT; i++) {
             boolean isFullLine = true;
@@ -415,8 +435,8 @@ public class Tetris {
                 break;
             case 4:
                 score = score + 15;
-                break;
         }
+        return lineCount;
     }
 
     private void figureToField(int[][] filedMatrix) {
@@ -451,13 +471,17 @@ public class Tetris {
     }
 
     private void notifyObserves() {
+        notifyObserves(false);
+    }
+
+    private void notifyObserves(boolean tetris) {
         if (observable.isEmpty()) return;
-        TetrisState state = getTetrisState();
+        TetrisState state = getTetrisState(tetris);
         observable.forEach(o -> o.accept(state));
     }
 
-    private TetrisState getTetrisState() {
-        return new TetrisState(id, getFieldState(), nextFigure.getState(), score, level, state);
+    private TetrisState getTetrisState(boolean tetris) {
+        return new TetrisState(id, getFieldState(), nextFigure.getState(), score, level, state, tetris);
     }
 
     public enum State {
